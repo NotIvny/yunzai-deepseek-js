@@ -55,10 +55,6 @@ export class DeepSeek extends plugin {
         const msg = e.msg.replace('#chat', '')
         let prompt = [{role: "system", content: customPrompt ? customPrompt : `你在一个QQ群里进行对话，群号为${e.group_id}，你需要记住每位用户的用户名和userid。如果你认为你正在对userid说话，则需要带上[CQ:at,qq=userid]。你可以一次at多位用户，但每位用户至多只能at一次。` }]
         let groupChatHistroy = ''
-        if (historyLength > 0) {
-            groupChatHistroy = await e.bot.pickGroup(e.group_id, true).getChatHistory(0, maxLength)
-            //prompt[0].content += '以下是群里的近期聊天记录：' + this.formatGroupChatHistory(groupChatHistroy)
-        }
         if (!Array.isArray(groupMessages[e.group_id])) {
             groupMessages[e.group_id] = []
         }
@@ -68,7 +64,11 @@ export class DeepSeek extends plugin {
         }
         let modifiedGroupMessages = groupMessages[e.group_id].map(msg => ({ ...msg }))
         //不存储聊天记录，节省token，提高缓存命中率
-        modifiedGroupMessages[modifiedGroupMessages.length - 1].content += '以下是群里的近期聊天记录：' + this.formatGroupChatHistory(groupChatHistroy)
+        if (historyLength > 0) {
+            groupChatHistroy = await e.bot.pickGroup(e.group_id, true).getChatHistory(0, maxLength)
+            modifiedGroupMessages[modifiedGroupMessages.length - 1].content += '以下是群里的近期聊天记录供参考：' + this.formatGroupChatHistory(groupChatHistroy)
+            //prompt[0].content += '以下是群里的近期聊天记录：' + this.formatGroupChatHistory(groupChatHistroy)
+        }
         await this.sendChat(e, [
             ...prompt,
             ...modifiedGroupMessages

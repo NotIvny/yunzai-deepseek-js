@@ -24,7 +24,7 @@ export class DeepSeek extends plugin {
                 {
                     reg: '^#deepseek设置上下文长度(.*)$',
                     fnc: 'setMaxLength',
-                    ppermission: 'master'
+                    permission: 'master'
                 },
                 {
                     reg: '^#deepseek设置群聊记录长度(.*)$',
